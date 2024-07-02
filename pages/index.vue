@@ -44,7 +44,10 @@
                                                 </p>
                                                 <p v-if="record !== '0' && players.length === 1"
                                                     class="text-[#E17E1D] text-xl font-bold mb-5">
-                                                    Record : {{ record }}
+                                                    Record : {{ record }} (détenu par {{ playerWhoHaveRecord }})
+                                                </p>
+                                                <p class="py-2 px-3 mb-5 cursor-none rounded-lg bg-[#E17E1D] text-white font-bold text-lg" v-if="players.length === 1" @click="() => {showRankingsFlag = false; players.pop()}">
+                                                    Revenir à l'accueil
                                                 </p>
                                             </div>
                                         </div>
@@ -188,6 +191,7 @@ const frames = [frame6, frame1, frame2, frame3, frame4, frame5, frame6];
 const framesHit = [frameHit1, frameHit2, frameHit3, frameHit4, frame6];
 const timeBar = ref();
 const record = ref(localStorage.getItem('record') || '0');
+const playerWhoHaveRecord = ref(localStorage.getItem('player') || '0');
 const numberOfPlayers = ref<Player[]>([]);
 const players = ref<Player[]>([]);
 const isOpen = ref(false);
@@ -318,7 +322,6 @@ function startGame() {
     isGameOver.value = false;
     animateMoles();
     hasGameStarted.value = true;
-    console.log(`${players.value[currentPlayerIndex.value].name} commence la partie`);
 }
 
 async function endGame(timer: any) {
@@ -335,7 +338,6 @@ async function endGame(timer: any) {
     score.value = 0;
     clearInterval(timer);
     updateRecord();
-    console.log(`${players.value[currentPlayerIndex.value].name} a fini la partie`);
     players.value[currentPlayerIndex.value].score = Number(finalScore.value);
     currentPlayerIndex.value += 1
     if (currentPlayerIndex.value === players.value.length) {
@@ -356,17 +358,22 @@ const sortedPlayers = computed(() => {
 
 function updateRecord() {
     const currentRecord = parseInt(localStorage.getItem('record') || '0');
+    const currentPlayerWhoHaveRecord = localStorage.getItem('player') || '0';
     if (parseInt(finalScore.value || '0') > currentRecord) {
         localStorage.setItem('record', finalScore.value || '0');
+        localStorage.setItem('player', players.value[currentPlayerIndex.value].name || '0');
         record.value = finalScore.value || '0';
+        playerWhoHaveRecord.value = players.value[currentPlayerIndex.value].name || '0';
     } else {
         record.value = currentRecord.toString();
+        playerWhoHaveRecord.value = currentPlayerWhoHaveRecord.toString();    
     }
 }
 
 watchEffect(() => {
-    if (isGameOver.value) {
+    if (isGameOver.value && playerWhoHaveRecord.value !== null) {
         finalScore.value = localStorage.getItem('score');
+        playerWhoHaveRecord.value = localStorage.getItem('player') as string;
     }
 });
 
@@ -413,5 +420,6 @@ body {
 
 .mole {
     -webkit-user-drag: none;
+    max-height: 130px;
 }
 </style>
