@@ -418,7 +418,7 @@ body {
     animation: decreaseWidth 45s linear forwards;
 }
 
-.mole {
+.mole, img {
     -webkit-user-drag: none;
     max-height: 130px;
 }
