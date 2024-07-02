@@ -158,7 +158,7 @@ const moles = Array.from({ length: 16 }, (_, index) => index);
 const score = ref(0);
 const hasClickedOnMole = ref(false);
 const isGameOver = ref(true);
-const timeLeft = ref(60);
+const timeLeft = ref(45);
 const hasGameStarted = ref(false);
 const cursoImg = "/assets/images/hammer_cursor.png";
 const cursorStyle: Ref<Record<string, string>> = ref({
@@ -292,7 +292,7 @@ function animateMoles() {
                 `#mole_${index}`,
                 {
                     attr: { src: frame },
-                    duration: 0.2,
+                    duration: 0.15,
                     ease: 'steps(1)',
                 },
                 frameIndex * 0.15
@@ -329,7 +329,7 @@ async function endGame(timer: any) {
     isGameOver.value = true;
     await nextTick();
     finalScore.value = score.value.toString();
-    timeLeft.value = 60;
+    timeLeft.value = 45;
     isOpen.value = true;
     timeBar.value.classList.remove('timer-animation');
     score.value = 0;
@@ -408,7 +408,7 @@ body {
 }
 
 .timer-animation {
-    animation: decreaseWidth 60s linear forwards;
+    animation: decreaseWidth 45s linear forwards;
 }
 
 .mole {
