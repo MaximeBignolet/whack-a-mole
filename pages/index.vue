@@ -38,8 +38,12 @@
                                                         </li>
                                                     </ul>
                                                 </div>
+                                                <p class="text-2xl font-bold text-white mb-5" v-if="players.length === 1">Le temps est écoulé !</p>
+                                                <p v-if="players.length === 1" class="mb-3 font-bold text-lg text-white">
+                                                    Score Final : {{ finalScore }}
+                                                </p>
                                                 <p v-if="record !== '0' && players.length === 1"
-                                                    class="text-[#E17E1D] text-xl font-bold">
+                                                    class="text-[#E17E1D] text-xl font-bold mb-5">
                                                     Record : {{ record }}
                                                 </p>
                                             </div>
@@ -76,7 +80,7 @@
                     </div>
                 </div>
             </div>
-            <div class="grid grid-cols-3 place-items-start 2xl:gap-20 lg:gap-5 mb-10 lg:mt-0 2xl:mt-10 select-none cursor-none"
+            <div class="grid grid-cols-4 grid-rows-3 place-items-start 2xl:gap-12 lg:gap-5 mb-10 lg:mt-0 2xl:mt-0 select-none cursor-none overflow-hidden"
                 v-if="players.length > 0">
                 <img :src="cursoImg" :style="cursorStyle" class="custom-cursor" />
                 <div class="h-fit w-44 select-none" v-for="(mole, index) in moles" :key="index">
@@ -109,6 +113,7 @@
                                             {{ index + 1 }}</label>
                                         <input :id="'nom_joueur_' + index" type="text"
                                             placeholder="Entrez le nom du joueur" v-model="player.name"
+                                            required
                                             class="py-2 px-5 rounded-xl placeholder:text-gray-300 placeholder:font-light text-white font-bold bg-[#E17E1D]" />
                                     </div>
                                 </div>
@@ -149,7 +154,7 @@ interface Player {
 
 const randomIndex = ref(0);
 const randomTime = ref(0);
-const moles = Array.from({ length: 9 }, (_, index) => index);
+const moles = Array.from({ length: 16 }, (_, index) => index);
 const score = ref(0);
 const hasClickedOnMole = ref(false);
 const isGameOver = ref(true);
@@ -264,7 +269,7 @@ function incrementScore(index: number) {
             `#mole_${index}`,
             {
                 attr: { src: frame },
-                duration: 0.2,
+                duration: 0.15,
                 ease: 'steps(1)',
             },
             frameIndex * 0.1
@@ -275,8 +280,14 @@ function incrementScore(index: number) {
 
 function animateMoles() {
     moles.forEach((_, index) => {
+        const mole = document.querySelectorAll(`.mole`);
         const timeline = gsap.timeline({ repeatDelay: 0.5 });
         frames.forEach((frame, frameIndex) => {
+        
+            if(frame === '/assets/images/frame_5.svg' || frame === '/assets/images/frame_6.svg'){
+                mole[5].classList.add('pointer-events-none')
+                mole[6].classList.add('pointer-events-none')
+            }
             timeline.to(
                 `#mole_${index}`,
                 {
@@ -372,12 +383,18 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+
+body {
+    overflow: hidden;
+}
+
 .custom-cursor {
     position: absolute;
     top: 0;
     left: 0;
     pointer-events: none;
     z-index: 1000;
+    overflow: hidden
 }
 
 @keyframes decreaseWidth {
