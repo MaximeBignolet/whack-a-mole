@@ -1,8 +1,7 @@
 <template>
     <div
         class="h-screen w-screen bg-[url('/assets/images/bg_playground.png')] bg-no-repeat bg-cover bg-center overflow-hidden game_area">
-        <img :src="cursoImg" :style="cursorStyle" class="custom-cursor" />
-        <TransitionRoot appear :show="isOpen" as="template">
+        <TransitionRoot appear :show="showRankingsFlag" as="template">
             <Dialog as="div" @close="closeModal" class="relative z-10">
                 <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0"
                     enter-to="opacity-100" leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
@@ -24,27 +23,25 @@
                                         </DialogTitle>
                                         <div class="flex flex-col items-center px-10 text-center">
                                             <div class="mt-4">
-                                                <p class="text-white text-2xl font-bold">
-                                                    Le temps est fini !
-                                                </p>
-                                            </div>
-                                            <div class="mt-4">
-                                                <p class="text-white text-xl font-bold">
-                                                    Score final : {{ finalScore }}
-                                                </p>
-                                                <p v-if="record !== '0'" class="text-[#E17E1D] text-xl font-bold">
+                                                <div v-if="players.length > 1">
+                                                    <p class="text-white text-xl font-bold">
+                                                        Classement final : 
+                                                    </p>
+                                                    <ul>
+                                                        <li v-for="(player, index) in sortedPlayers" :key="index">
+                                                            <div class="flex items-center gap-3 text-[#E17E1D] font-bold my-5" :class="index === 0 ? 'text-2xl' : index === 1 ? 'text-lg' : 'text-md'">
+                                                                <img src="/assets/images/couronne.png" alt="" v-if="index === 0" class="h-10">
+                                                                <img src="/assets/images/silver_medal.svg" alt="" v-if="index === 1" class="h-8 my-5">
+                                                                <img src="/assets/images/bronze_medal.svg" alt="" v-if="index === 2" class="h-8">
+                                                                <p> {{ player.name }} - {{ player.score }} points</p>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <p v-if="record !== '0' && players.length === 1"
+                                                    class="text-[#E17E1D] text-xl font-bold">
                                                     Record : {{ record }}
                                                 </p>
-                                                <p v-else>
-                                                    Record : Pas encore de record personnel
-                                                </p>
-                                            </div>
-                                            <div class="mt-4">
-                                                <button type="button"
-                                                    class="inline-flex justify-center rounded-lg mb-4 border border-transparent bg-[#E17E1D] px-10 py-2 text-sm font-medium text-white"
-                                                    @click="{ closeModal(); startGame() }">
-                                                    Rejouer
-                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -79,15 +76,55 @@
                     </div>
                 </div>
             </div>
-            <div class="grid grid-cols-3 place-items-start 2xl:gap-20 lg:gap-5 mb-10 lg:mt-0 2xl:mt-10 select-none">
+            <div class="grid grid-cols-3 place-items-start 2xl:gap-20 lg:gap-5 mb-10 lg:mt-0 2xl:mt-10 select-none cursor-none"
+                v-if="players.length > 0">
+                <img :src="cursoImg" :style="cursorStyle" class="custom-cursor" />
                 <div class="h-fit w-44 select-none" v-for="(mole, index) in moles" :key="index">
                     <img src="/assets/images/frame_6.svg" :id="'mole_' + index" class="mole"
                         @click="incrementScore(index)" />
                 </div>
             </div>
-            <p class="bg-[#42D3FF] py-2 px-6 shadow rounded-md text-xl font-bold" @click="startGame"
-                v-if="!hasGameStarted">
-                Commencer
+            <div v-else class="bg-white rounded-3xl p-1 my-10">
+                <div class="bg-[#0A3442] p-2 rounded-3xl">
+                    <div class="bg-[#02799D] p-4 rounded-3xl">
+                        <p class="text-white text-2xl font-bold text-center mt-3">Veuillez choisir le nombre de joueur
+                        </p>
+                        <div class="flex justify-center gap-3 items-center my-5">
+                            <p class="bg-[#E17E1D] aspect-square cursor-pointer h-10 flex flex-col items-center text-white rounded-xl justify-center"
+                                id="un" @click="onClickLogClass">1</p>
+                            <p class="bg-[#E17E1D] aspect-square cursor-pointer h-10 flex flex-col items-center text-white rounded-xl justify-center "
+                                id="deux" @click="onClickLogClass">2</p>
+                            <p class="bg-[#E17E1D] aspect-square cursor-pointer h-10 flex flex-col items-center text-white rounded-xl justify-center trois"
+                                id="trois" @click="onClickLogClass">3</p>
+                            <p class="bg-[#E17E1D] aspect-square cursor-pointer h-10 flex flex-col items-center text-white rounded-xl justify-center quatre"
+                                id="quatre" @click="onClickLogClass">4</p>
+                        </div>
+                        <div v-if="numberOfPlayers.length > 0">
+                            <p class="text-white text-2xl font-bold text-center">Veuillez entrer votre nom pour
+                                enregistrer votre score</p>
+                            <form @submit.prevent="handleSubmit">
+                                <div v-for="(player, index) in numberOfPlayers" :key="index" class="my-5">
+                                    <div class="flex flex-col items-center gap-5">
+                                        <label :for="'nom_joueur_' + index" class="text-white font-bold text-xl">Joueur
+                                            {{ index + 1 }}</label>
+                                        <input :id="'nom_joueur_' + index" type="text"
+                                            placeholder="Entrez le nom du joueur" v-model="player.name"
+                                            class="py-2 px-5 rounded-xl placeholder:text-gray-300 placeholder:font-light text-white font-bold bg-[#E17E1D]" />
+                                    </div>
+                                </div>
+                                <div class="flex justify-center mt-10">
+                                    <button type="submit"
+                                        class="inline-flex justify-center rounded-lg mb-4 border border-transparent bg-white px-5 py-2 text-sm font-medium ">Commencer
+                                        la partie</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="bg-[#42D3FF] py-2 px-6 shadow rounded-md text-xl font-bold cursor-none" @click="startGame"
+                v-if="!hasGameStarted && players.length">
+                {{ players[currentPlayerIndex].name }} - Commence la partie
             </p>
         </div>
     </div>
@@ -105,10 +142,9 @@ import {
 import { ref, watchEffect, onMounted, onUnmounted, nextTick } from 'vue';
 import { Howl } from 'howler';
 
-const isOpen = ref(false);
-
-function closeModal() {
-    isOpen.value = false;
+interface Player {
+    name: string
+    score: number
 }
 
 const randomIndex = ref(0);
@@ -147,6 +183,37 @@ const frames = [frame6, frame1, frame2, frame3, frame4, frame5, frame6];
 const framesHit = [frameHit1, frameHit2, frameHit3, frameHit4, frame6];
 const timeBar = ref();
 const record = ref(localStorage.getItem('record') || '0');
+const numberOfPlayers = ref<Player[]>([]);
+const players = ref<Player[]>([]);
+const isOpen = ref(false);
+const currentPlayerIndex = ref(0);
+const showRankingsFlag = ref(false);
+
+function closeModal() {
+    isOpen.value = false;
+}
+
+const onClickLogClass = (event: any) => {
+    switch (event.target.id) {
+        case 'un':
+            numberOfPlayers.value = [{ name: '', score: 0 }];
+            break;
+        case 'deux':
+            numberOfPlayers.value = [{ name: '', score: 0 }, { name: '', score: 0 }];
+            break;
+        case 'trois':
+            numberOfPlayers.value = [{ name: '', score: 0 }, { name: '', score: 0 }, { name: '', score: 0 }];
+            break;
+        case 'quatre':
+            numberOfPlayers.value = [{ name: '', score: 0 }, { name: '', score: 0 }, { name: '', score: 0 }, { name: '', score: 0 }];
+            break;
+    }
+}
+
+const handleSubmit = () => {
+    players.value.push(...numberOfPlayers.value);
+}
+
 
 const backgroundMusic = new Howl({
     src: '/assets/bg_music.mp3',
@@ -240,6 +307,7 @@ function startGame() {
     isGameOver.value = false;
     animateMoles();
     hasGameStarted.value = true;
+    console.log(`${players.value[currentPlayerIndex.value].name} commence la partie`);
 }
 
 async function endGame(timer: any) {
@@ -254,10 +322,26 @@ async function endGame(timer: any) {
     isOpen.value = true;
     timeBar.value.classList.remove('timer-animation');
     score.value = 0;
-    hasGameStarted.value = false;
     clearInterval(timer);
     updateRecord();
+    console.log(`${players.value[currentPlayerIndex.value].name} a fini la partie`);
+    players.value[currentPlayerIndex.value].score = Number(finalScore.value);
+    currentPlayerIndex.value += 1
+    if (currentPlayerIndex.value === players.value.length) {
+        showRankings();
+        currentPlayerIndex.value = 0;
+    }
+    hasGameStarted.value = false;
 }
+
+function showRankings() {
+    showRankingsFlag.value = true;
+}
+
+const sortedPlayers = computed(() => {
+    return players.value.slice().sort((a, b) => b.score - a.score);
+});
+
 
 function updateRecord() {
     const currentRecord = parseInt(localStorage.getItem('record') || '0');
@@ -277,7 +361,7 @@ watchEffect(() => {
 
 onMounted(() => {
     document.addEventListener('mousemove', updateCursorPosition);
-    document.body.style.cursor = 'none';
+
 });
 
 onUnmounted(() => {
