@@ -348,11 +348,6 @@ function startGame() {
             endGame(timer);
         }
     }, 1000);
-    if(timeLeft.value === 20) {
-        backgroundMusic.rate(1.3);
-    } else if(timeLeft.value === 10) {
-        backgroundMusic.rate(1.5);
-    }
     isGameOver.value = false;
     animateMoles();
     hasGameStarted.value = true;
