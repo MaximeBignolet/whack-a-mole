@@ -83,7 +83,7 @@
                     </div>
                 </div>
             </div>
-            <div class="grid grid-cols-4 grid-rows-3 place-items-start 2xl:gap-12 lg:gap-5 mb-10 lg:mt-0 2xl:mt-0 select-none cursor-none overflow-hidden"
+            <div class="grid grid-cols-4 grid-rows-3 place-items-start gap-5 mb-10 lg:mt-0 2xl:mt-0 select-none cursor-none overflow-hidden"
                 v-if="players.length > 0">
                 <img :src="cursoImg" :style="cursorStyle" class="custom-cursor" />
                 <div class="h-fit w-44 select-none" v-for="(mole, index) in moles" :key="index">
