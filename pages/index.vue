@@ -1,6 +1,18 @@
 <template>
     <div
-        class="h-screen w-screen bg-[url('/assets/images/bg_playground.png')] bg-no-repeat bg-cover bg-center overflow-hidden game_area">
+        class="h-screen w-screen bg-[url('/assets/images/bg_playground.png')] bg-no-repeat bg-cover bg-center overflow-hidden game_area" ref="content">
+        <div class="flex justify-end gap-5 items-center">
+            <div class="pt-2">
+                <img src="/assets/images/unmute.png" alt="" class="h-9 w-9 bg-[#E17E1D] rounded-xl cursor-pointer p-2" @click="onClickUnMute" v-if="ismute">
+                <img src="/assets/images/mute.png" alt="" class="h-9 w-9 bg-[#E17E1D] rounded-xl cursor-pointer p-2" @click="onClickMute" v-if="isMusicPlaying && !ismute">
+            </div>
+                <div class="flex justify-end mr-10  text-white font-bold pt-2" v-if="!isFullScreen">
+                <button @click="enterFulScreen" class="bg-[#E17E1D] rounded-xl p-2">Plein écran</button>
+            </div>
+            <div class="flex justify-end mr-10  text-white font-bold pt-2" v-else>
+                <button @click="quitFullScreen" class="bg-[#E17E1D] rounded-xl p-2">Quitter le plein écran</button>
+            </div>
+        </div>
         <TransitionRoot appear :show="showRankingsFlag" as="template">
             <Dialog as="div" @close="closeModal" class="relative z-10">
                 <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0"
@@ -67,7 +79,7 @@
                 </div>
             </Dialog>
         </TransitionRoot>
-        <div class="flex flex-col 2xl:gap-10 lg:gap-0 justify-center items-center container mx-auto pt-10">
+        <div class="flex flex-col 2xl:gap-10 lg:gap-0 justify-center items-center container mx-auto">
             <div class="flex justify-center items-center gap-20 min-h-[130px]">
                 <div class="bg-white rounded-full p-1 relative">
                     <img src="/assets/images/score_coin.png" alt="" class="h-14 w-14" />
@@ -203,6 +215,10 @@ const players = ref<Player[]>([]);
 const isOpen = ref(false);
 const currentPlayerIndex = ref(0);
 const showRankingsFlag = ref(false);
+const content = ref<HTMLDivElement | null>(null);
+const isFullScreen = ref(false);
+const ismute = ref(false);
+const isMusicPlaying = ref(false);
 
 function closeModal() {
     isOpen.value = false;
@@ -319,6 +335,7 @@ function startGame() {
     startRandomInterval();
     randomizeMoleVisibility();
     backgroundMusic.play();
+    isMusicPlaying.value = true;
     if (timeBar.value) {
         timeBar.value.classList.add('timer-animation');
     }
@@ -393,9 +410,41 @@ watch(timeLeft, (newTime) => {
     }
 });
 
+const enterFulScreen = () => {
+    isFullScreen.value = true;
+    if (content.value !== null) {
+        if (content.value.requestFullscreen) {
+            content.value.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+        }
+    }
+}
+
+const quitFullScreen = () => {
+    isFullScreen.value = false;
+    if (document.exitFullscreen) {
+        document.exitFullscreen().catch(err => {
+            console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+        });
+    }
+}
+
+const onClickMute = () => {
+    if(isMusicPlaying.value) {
+        backgroundMusic.pause();
+        ismute.value = true;
+    }
+}
+
+const onClickUnMute = () => {
+
+       backgroundMusic.play();
+        ismute.value = false;
+}
+
 onMounted(() => {
     document.addEventListener('mousemove', updateCursorPosition);
-
 });
 
 onUnmounted(() => {
