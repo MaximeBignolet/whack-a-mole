@@ -1,12 +1,14 @@
 <template>
-    <div
-        class="h-screen w-screen bg-[url('/assets/images/bg_playground.png')] bg-no-repeat bg-cover bg-center overflow-hidden game_area" ref="content">
+    <div class="h-screen w-screen bg-[url('/assets/images/bg_playground.png')] bg-no-repeat bg-cover bg-center overflow-hidden game_area"
+        ref="content">
         <div class="flex justify-end gap-5 items-center">
             <div class="pt-2">
-                <img src="/assets/images/unmute.png" alt="" class="h-9 w-9 bg-[#E17E1D] rounded-xl cursor-pointer p-2" @click="onClickUnMute" v-if="ismute">
-                <img src="/assets/images/mute.png" alt="" class="h-9 w-9 bg-[#E17E1D] rounded-xl cursor-pointer p-2" @click="onClickMute" v-if="isMusicPlaying && !ismute">
+                <img src="/assets/images/unmute.png" alt="" class="h-9 w-9 bg-[#E17E1D] rounded-xl cursor-pointer p-2"
+                    @click="onClickUnMute" v-if="ismute">
+                <img src="/assets/images/mute.png" alt="" class="h-9 w-9 bg-[#E17E1D] rounded-xl cursor-pointer p-2"
+                    @click="onClickMute" v-if="isMusicPlaying && !ismute">
             </div>
-                <div class="flex justify-end mr-10  text-white font-bold pt-2" v-if="!isFullScreen">
+            <div class="flex justify-end mr-10  text-white font-bold pt-2" v-if="!isFullScreen">
                 <button @click="enterFulScreen" class="bg-[#E17E1D] rounded-xl p-2">Plein écran</button>
             </div>
             <div class="flex justify-end mr-10  text-white font-bold pt-2" v-else>
@@ -98,7 +100,7 @@
                             class="absolute -top-7 left-[250%] w-44 h-10 rounded-md bg-white transform -translate-x-1/2 -translate-y-1/2 text-white text-2xl">
                         </p>
                         <p class="absolute -top-[46px] rounded-md left-[94%] w-[172px] h-9 bg-[#0A3442]"></p>
-                        <p class="absolute -top-[46px] rounded-md left-[94%] w-[172px] h-9 bg-[#02799D]" ref="timeBar">
+                        <p class="absolute -top-[46px] rounded-md left-[94%] w-[172px] h-9" ref="timeBar">
                         </p>
                     </div>
                 </div>
@@ -253,6 +255,7 @@ const backgroundMusic = new Howl({
     volume: 0.4,
 });
 
+
 const hit = new Howl({
     src: '/assets/hit.wav',
     volume: 0.5,
@@ -345,6 +348,11 @@ function startGame() {
             endGame(timer);
         }
     }, 1000);
+    if(timeLeft.value === 20) {
+        backgroundMusic.rate(1.3);
+    } else if(timeLeft.value === 10) {
+        backgroundMusic.rate(1.5);
+    }
     isGameOver.value = false;
     animateMoles();
     hasGameStarted.value = true;
@@ -431,7 +439,7 @@ const quitFullScreen = () => {
 }
 
 const onClickMute = () => {
-    if(isMusicPlaying.value) {
+    if (isMusicPlaying.value) {
         backgroundMusic.pause();
         ismute.value = true;
     }
@@ -439,8 +447,8 @@ const onClickMute = () => {
 
 const onClickUnMute = () => {
 
-       backgroundMusic.play();
-        ismute.value = false;
+    backgroundMusic.play();
+    ismute.value = false;
 }
 
 onMounted(() => {
@@ -471,10 +479,33 @@ body {
 @keyframes decreaseWidth {
     from {
         width: 172px;
+        background: #02799D;
+    }
+
+    70% {
+        width: 34.4px;
+        background: #ff0000;
+        animation: pulse 1s infinite;
     }
 
     to {
-        width: 0px;
+        width: 0;
+        background: #ff0000;
+        animation: pulse 1s infinite;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
     }
 }
 
