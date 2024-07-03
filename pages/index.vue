@@ -25,30 +25,38 @@
                                             <div class="mt-4">
                                                 <div v-if="players.length > 1">
                                                     <p class="text-white text-xl font-bold">
-                                                        Classement final : 
+                                                        Classement final :
                                                     </p>
                                                     <ul>
                                                         <li v-for="(player, index) in sortedPlayers" :key="index">
-                                                            <div class="flex items-center gap-3 text-[#E17E1D] font-bold my-5" :class="index === 0 ? 'text-2xl' : index === 1 ? 'text-lg' : 'text-md'">
-                                                                <img src="/assets/images/couronne.png" alt="" v-if="index === 0" class="h-10">
-                                                                <img src="/assets/images/silver_medal.svg" alt="" v-if="index === 1" class="h-8 my-5">
-                                                                <img src="/assets/images/bronze_medal.svg" alt="" v-if="index === 2" class="h-8">
+                                                            <div class="flex items-center gap-3 text-[#E17E1D] font-bold my-5"
+                                                                :class="index === 0 ? 'text-2xl' : index === 1 ? 'text-lg' : 'text-md'">
+                                                                <img src="/assets/images/couronne.png" alt=""
+                                                                    v-if="index === 0" class="h-10">
+                                                                <img src="/assets/images/silver_medal.svg" alt=""
+                                                                    v-if="index === 1" class="h-8 my-5">
+                                                                <img src="/assets/images/bronze_medal.svg" alt=""
+                                                                    v-if="index === 2" class="h-8">
                                                                 <p> {{ player.name }} - {{ player.score }} points</p>
                                                             </div>
                                                         </li>
                                                     </ul>
                                                 </div>
-                                                <p class="text-2xl font-bold text-white mb-5" v-if="players.length === 1">Le temps est écoulé !</p>
-                                                <p v-if="players.length === 1" class="mb-3 font-bold text-lg text-white">
+                                                <p class="text-2xl font-bold text-white mb-5"
+                                                    v-if="players.length === 1">Le temps est écoulé !</p>
+                                                <p v-if="players.length === 1"
+                                                    class="mb-3 font-bold text-lg text-white">
                                                     Score Final : {{ finalScore }}
                                                 </p>
                                                 <p v-if="record !== '0' && players.length === 1"
                                                     class="text-[#E17E1D] text-xl font-bold mb-5">
                                                     Record : {{ record }} (détenu par {{ playerWhoHaveRecord }})
                                                 </p>
-                                                <p class="py-2 px-3 mb-5 cursor-none rounded-lg bg-[#E17E1D] text-white font-bold text-lg" v-if="players.length === 1" @click="() => {showRankingsFlag = false; players.pop()}">
+                                                <a href="/"
+                                                    class="py-2 px-3 mb-5 cursor-none rounded-lg bg-[#E17E1D] text-white font-bold text-lg"
+                                                    v-if="players.length === 1">
                                                     Revenir à l'accueil
-                                                </p>
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -115,8 +123,7 @@
                                         <label :for="'nom_joueur_' + index" class="text-white font-bold text-xl">Joueur
                                             {{ index + 1 }}</label>
                                         <input :id="'nom_joueur_' + index" type="text"
-                                            placeholder="Entrez le nom du joueur" v-model="player.name"
-                                            required
+                                            placeholder="Entrez le nom du joueur" v-model="player.name" required
                                             class="py-2 px-5 rounded-xl placeholder:text-gray-300 placeholder:font-light text-white font-bold bg-[#E17E1D]" />
                                     </div>
                                 </div>
@@ -147,7 +154,6 @@ import {
     DialogPanel,
     DialogTitle,
 } from '@headlessui/vue'
-import { ref, watchEffect, onMounted, onUnmounted, nextTick } from 'vue';
 import { Howl } from 'howler';
 
 interface Player {
@@ -221,6 +227,7 @@ const onClickLogClass = (event: any) => {
 
 const handleSubmit = () => {
     players.value.push(...numberOfPlayers.value);
+    numberOfPlayers.value = [];
 }
 
 
@@ -287,8 +294,8 @@ function animateMoles() {
         const mole = document.querySelectorAll(`.mole`);
         const timeline = gsap.timeline({ repeatDelay: 0.5 });
         frames.forEach((frame, frameIndex) => {
-        
-            if(frame === '/assets/images/frame_5.svg' || frame === '/assets/images/frame_6.svg'){
+
+            if (frame === '/assets/images/frame_5.svg' || frame === '/assets/images/frame_6.svg') {
                 mole[5].classList.add('pointer-events-none')
                 mole[6].classList.add('pointer-events-none')
             }
@@ -355,7 +362,6 @@ const sortedPlayers = computed(() => {
     return players.value.slice().sort((a, b) => b.score - a.score);
 });
 
-
 function updateRecord() {
     const currentRecord = parseInt(localStorage.getItem('record') || '0');
     const currentPlayerWhoHaveRecord = localStorage.getItem('player') || '0';
@@ -366,7 +372,7 @@ function updateRecord() {
         playerWhoHaveRecord.value = players.value[currentPlayerIndex.value].name || '0';
     } else {
         record.value = currentRecord.toString();
-        playerWhoHaveRecord.value = currentPlayerWhoHaveRecord.toString();    
+        playerWhoHaveRecord.value = currentPlayerWhoHaveRecord.toString();
     }
 }
 
@@ -374,6 +380,14 @@ watchEffect(() => {
     if (isGameOver.value && playerWhoHaveRecord.value !== null) {
         finalScore.value = localStorage.getItem('score');
         playerWhoHaveRecord.value = localStorage.getItem('player') as string;
+    }
+});
+
+watch(timeLeft, (newTime) => {
+    if (timeBar.value) {
+        if (!timeBar.value.classList.contains('timer-animation')) {
+            timeBar.value.classList.add('timer-animation');
+        }
     }
 });
 
@@ -390,7 +404,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-
 body {
     overflow: hidden;
 }
@@ -418,7 +431,8 @@ body {
     animation: decreaseWidth 45s linear forwards;
 }
 
-.mole, img {
+.mole,
+img {
     -webkit-user-drag: none;
     max-height: 130px;
 }
