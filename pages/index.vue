@@ -99,7 +99,7 @@
                         @click="incrementScore(index)" />
                 </div>
             </div>
-            <div v-else class="bg-white rounded-3xl p-1 my-10">
+            <div v-else class="bg-white rounded-3xl p-1">
                 <div class="bg-[#0A3442] p-2 rounded-3xl">
                     <div class="bg-[#02799D] p-4 rounded-3xl">
                         <p class="text-white text-2xl font-bold text-center mt-3">Veuillez choisir le nombre de joueur
@@ -294,17 +294,19 @@ function animateMoles() {
         const mole = document.querySelectorAll(`.mole`);
         const timeline = gsap.timeline({ repeatDelay: 0.5 });
         frames.forEach((frame, frameIndex) => {
-
-            if (frame === '/assets/images/frame_5.svg' || frame === '/assets/images/frame_6.svg') {
-                mole[5].classList.add('pointer-events-none')
-                mole[6].classList.add('pointer-events-none')
-            }
             timeline.to(
                 `#mole_${index}`,
                 {
                     attr: { src: frame },
                     duration: 0.15,
                     ease: 'steps(1)',
+                    onUpdate: () => {
+                        if (frame === '/assets/images/frame_6.svg') {
+                            mole[index].classList.add('pointer-events-none');
+                        } else {
+                            mole[index].classList.remove('pointer-events-none');
+                        }
+                    },
                 },
                 frameIndex * 0.15
             );
