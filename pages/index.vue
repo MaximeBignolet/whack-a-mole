@@ -65,7 +65,7 @@
                                                     Record : {{ record }} (détenu par {{ playerWhoHaveRecord }})
                                                 </p>
                                                 <a href="/"
-                                                    class="py-2 px-3 mb-5 cursor-none rounded-lg bg-[#E17E1D] text-white font-bold text-lg"
+                                                    class="py-2 px-3 block mb-5 cursor-none rounded-lg bg-[#E17E1D] text-white font-bold text-lg"
                                                     v-if="players.length === 1">
                                                     Revenir à l'accueil
                                                 </a>
