@@ -109,7 +109,7 @@
                 v-if="players.length > 0">
                 <img :src="cursoImg" :style="cursorStyle" class="custom-cursor" />
                 <div class="h-fit w-44 select-none" v-for="(mole, index) in moles" :key="index">
-                    <img src="/assets/images/frame_6.svg" :id="'mole_' + index" class="mole"
+                    <img src="/assets/images/frame_6.svg" :id="'mole_' + index" class="mole" :ref="el => setMoleRef(el, index)" 
                         @click="incrementScore(index)" />
                 </div>
             </div>
@@ -143,16 +143,15 @@
                                 </div>
                                 <div class="flex justify-center mt-10">
                                     <button type="submit"
-                                        class="inline-flex justify-center rounded-lg mb-4 border border-transparent bg-white px-5 py-2 text-sm font-medium ">Commencer
-                                        la partie</button>
+                                        class="inline-flex justify-center rounded-lg mb-4 border border-transparent bg-white px-5 py-2 text-sm font-medium ">Suivant</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
-            <p class="bg-[#42D3FF] py-2 px-6 shadow rounded-md text-xl font-bold cursor-none" @click="startGame"
-                v-if="!hasGameStarted && players.length">
+            <p class="bg-[#42D3FF] animate-bounce py-2 px-6 shadow rounded-md text-xl font-bold cursor-none"
+                @click="startGame" v-if="!hasGameStarted && players.length">
                 {{ players[currentPlayerIndex].name }} - Commence la partie
             </p>
         </div>
@@ -221,7 +220,15 @@ const content = ref<HTMLDivElement | null>(null);
 const isFullScreen = ref(false);
 const ismute = ref(false);
 const isMusicPlaying = ref(false);
+const moleRefs = ref<(HTMLElement | null)[]>([]);
 
+function setMoleRef(el: Element | ComponentPublicInstance | null, index: number) {
+  if (el instanceof HTMLElement) {
+    moleRefs.value[index] = el;
+  } else {
+    moleRefs.value[index] = null;
+  }
+}
 function closeModal() {
     isOpen.value = false;
 }
@@ -309,29 +316,31 @@ function incrementScore(index: number) {
 }
 
 function animateMoles() {
-    moles.forEach((_, index) => {
-        const mole = document.querySelectorAll(`.mole`);
-        const timeline = gsap.timeline({ repeatDelay: 0.5 });
-        frames.forEach((frame, frameIndex) => {
-            timeline.to(
-                `#mole_${index}`,
-                {
-                    attr: { src: frame },
-                    duration: 0.15,
-                    ease: 'steps(1)',
-                    onUpdate: () => {
-                        if (frame === '/assets/images/frame_6.svg') {
-                            mole[index].classList.add('pointer-events-none');
-                        } else {
-                            mole[index].classList.remove('pointer-events-none');
-                        }
-                    },
-                },
-                frameIndex * 0.15
-            );
-        });
-        timelines.push(timeline);
+  moles.forEach((_, index) => {
+    const timeline = gsap.timeline({ repeatDelay: 0.5 });
+    frames.forEach((frame, frameIndex) => {
+      timeline.to(
+        `#mole_${index}`,
+        {
+          attr: { src: frame },
+          duration: 0.15,
+          ease: 'steps(1)',
+          onUpdate: () => {
+            const mole = moleRefs.value[index];
+            if (mole) {
+              if (frame === '/assets/images/frame_6.svg') {
+                mole.style.pointerEvents = 'none';
+              } else {
+                mole.style.pointerEvents = 'auto';
+              }
+            }
+          },
+        },
+        frameIndex * 0.15
+      );
     });
+    timelines.push(timeline);
+  });
 }
 
 function startGame() {
