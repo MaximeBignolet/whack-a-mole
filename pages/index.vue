@@ -189,7 +189,7 @@ const cursorStyle: Ref<Record<string, string>> = ref({
     left: '0',
     width: '80px',
     height: '80px',
-    transform: 'translate(-50%, -50%)',
+    transform: 'translate(-50%, -50%) rotate(0deg)',
 });
 let timeOutId: any;
 let moleTimeoutId: any;
@@ -300,6 +300,10 @@ function incrementScore(index: number) {
     score.value += 10;
     hit.play();
     hasClickedOnMole.value = true;
+    gsap.fromTo(cursorStyle.value, 
+    { transform: 'translate(-50%, -50%) rotate(0deg)' }, 
+    { transform: 'translate(-50%, -50%) rotate(-45deg)', duration: 0.1, yoyo: true, repeat: 1 },
+  );
     const timelineHit = gsap.timeline({ repeatDelay: 0.5 });
     framesHit.forEach((frame, frameIndex) => {
         timelineHit.to(
@@ -477,7 +481,7 @@ body {
     left: 0;
     pointer-events: none;
     z-index: 1000;
-    overflow: hidden
+    overflow: hidden;
 }
 
 @keyframes decreaseWidth {
