@@ -48,10 +48,11 @@
                                                                 <img src="/assets/images/couronne.png" alt=""
                                                                     v-if="index === 0" class="h-10">
                                                                 <img src="/assets/images/silver_medal.svg" alt=""
-                                                                    v-if="index === 1" class="h-8 my-5">
+                                                                    v-if="index === 1" class="h-8 my-2">
                                                                 <img src="/assets/images/bronze_medal.svg" alt=""
                                                                     v-if="index === 2" class="h-8">
-                                                                <p> {{ player.name }} - {{ player.score }} points</p>
+                                                                    <p v-if="index === 3" class="h-8 w-8"></p>
+                                                                    <p> {{ player.name }} - {{ player.score }} points</p>
                                                             </div>
                                                         </li>
                                                     </ul>
@@ -68,7 +69,7 @@
                                                 </p>
                                                 <a href="/"
                                                     class="py-2 px-3 block mb-5 cursor-none rounded-lg bg-[#E17E1D] text-white font-bold text-lg"
-                                                    v-if="players.length === 1">
+                                                    v-if="players.length">
                                                     Revenir à l'accueil
                                                 </a>
                                             </div>
@@ -109,8 +110,8 @@
                 v-if="players.length > 0">
                 <img :src="cursoImg" :style="cursorStyle" class="custom-cursor" />
                 <div class="h-fit w-44 select-none" v-for="(mole, index) in moles" :key="index">
-                    <img src="/assets/images/frame_6.svg" :id="'mole_' + index" class="mole" :ref="el => setMoleRef(el, index)" 
-                        @click="incrementScore(index)" />
+                    <img src="/assets/images/frame_6.svg" :id="'mole_' + index" class="mole"
+                        :ref="el => setMoleRef(el, index)" @click="incrementScore(index)" />
                 </div>
             </div>
             <div v-else class="bg-white rounded-3xl p-1">
@@ -223,11 +224,11 @@ const isMusicPlaying = ref(false);
 const moleRefs = ref<(HTMLElement | null)[]>([]);
 
 function setMoleRef(el: Element | ComponentPublicInstance | null, index: number) {
-  if (el instanceof HTMLElement) {
-    moleRefs.value[index] = el;
-  } else {
-    moleRefs.value[index] = null;
-  }
+    if (el instanceof HTMLElement) {
+        moleRefs.value[index] = el;
+    } else {
+        moleRefs.value[index] = null;
+    }
 }
 function closeModal() {
     isOpen.value = false;
@@ -300,10 +301,10 @@ function incrementScore(index: number) {
     score.value += 10;
     hit.play();
     hasClickedOnMole.value = true;
-    gsap.fromTo(cursorStyle.value, 
-    { transform: 'translate(-50%, -50%) rotate(0deg)' }, 
-    { transform: 'translate(-50%, -50%) rotate(-45deg)', duration: 0.1, yoyo: true, repeat: 1 },
-  );
+    gsap.fromTo(cursorStyle.value,
+        { transform: 'translate(-50%, -50%) rotate(0deg)' },
+        { transform: 'translate(-50%, -50%) rotate(-45deg)', duration: 0.1, yoyo: true, repeat: 1 },
+    );
     const timelineHit = gsap.timeline({ repeatDelay: 0.5 });
     framesHit.forEach((frame, frameIndex) => {
         timelineHit.to(
@@ -320,31 +321,31 @@ function incrementScore(index: number) {
 }
 
 function animateMoles() {
-  moles.forEach((_, index) => {
-    const timeline = gsap.timeline({ repeatDelay: 0.5 });
-    frames.forEach((frame, frameIndex) => {
-      timeline.to(
-        `#mole_${index}`,
-        {
-          attr: { src: frame },
-          duration: 0.15,
-          ease: 'steps(1)',
-          onUpdate: () => {
-            const mole = moleRefs.value[index];
-            if (mole) {
-              if (frame === '/assets/images/frame_6.svg') {
-                mole.style.pointerEvents = 'none';
-              } else {
-                mole.style.pointerEvents = 'auto';
-              }
-            }
-          },
-        },
-        frameIndex * 0.15
-      );
+    moles.forEach((_, index) => {
+        const timeline = gsap.timeline({ repeatDelay: 0.5 });
+        frames.forEach((frame, frameIndex) => {
+            timeline.to(
+                `#mole_${index}`,
+                {
+                    attr: { src: frame },
+                    duration: 0.15,
+                    ease: 'steps(1)',
+                    onUpdate: () => {
+                        const mole = moleRefs.value[index];
+                        if (mole) {
+                            if (frame === '/assets/images/frame_6.svg') {
+                                mole.style.pointerEvents = 'none';
+                            } else {
+                                mole.style.pointerEvents = 'auto';
+                            }
+                        }
+                    },
+                },
+                frameIndex * 0.15
+            );
+        });
+        timelines.push(timeline);
     });
-    timelines.push(timeline);
-  });
 }
 
 function startGame() {
@@ -376,7 +377,9 @@ async function endGame(timer: any) {
     finalScore.value = score.value.toString();
     timeLeft.value = 45;
     isOpen.value = true;
-    timeBar.value.classList.remove('timer-animation');
+    if (timeBar.value) {
+        timeBar.value.classList.remove('timer-animation');
+    }
     score.value = 0;
     clearInterval(timer);
     updateRecord();
@@ -385,6 +388,8 @@ async function endGame(timer: any) {
     if (currentPlayerIndex.value === players.value.length) {
         showRankings();
         currentPlayerIndex.value = 0;
+    } else {
+        hasGameStarted.value = false;
     }
     hasGameStarted.value = false;
 }
@@ -418,13 +423,6 @@ watchEffect(() => {
     }
 });
 
-watch(timeLeft, (newTime) => {
-    if (timeBar.value) {
-        if (!timeBar.value.classList.contains('timer-animation')) {
-            timeBar.value.classList.add('timer-animation');
-        }
-    }
-});
 
 const enterFulScreen = () => {
     isFullScreen.value = true;
