@@ -521,7 +521,7 @@ body {
 
 .mole,
 img {
-    -webkit-user-drag: none;
+    -webkit-user-drag: none;  
     max-height: 130px;
 }
 </style>
